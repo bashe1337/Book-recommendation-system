@@ -1,0 +1,45 @@
+* {
+	font-family: sans-serif !important;
+	scrollbar-width: thin;
+	// scrollbar-color: $green-lighten-2 $grey-lighten-3;
+
+	&::-webkit-scrollbar {
+		width: 10px;
+		border-radius: 5px;
+	}
+
+	// &::-webkit-scrollbar-track {
+	// 	// background: $grey-lighten-3;
+	// }
+
+	&::-webkit-scrollbar-thumb {
+		// background-color: #FFF;
+		border-radius: 5px;
+		// border: 2px solid $grey-lighten-3;
+	}
+}
+
+.global_container {
+	padding: 10px;
+}
+h1 {
+	font-family: 'Roboto';
+}
+h2 {
+	font-family: 'Roboto';
+	font-size: 24px;
+}
+h3 {
+	font-family: 'Roboto';
+	font-size: 19px;
+}
+h4 {
+	font-family: 'Roboto';
+}
+h5 {
+	font-family: 'Roboto';
+	font-size: 13px;
+}
+h6 {
+	font-family: 'Roboto';
+}
