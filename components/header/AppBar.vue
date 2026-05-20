@@ -14,9 +14,13 @@
 				</NuxtLink>
 			</div>
 
+			<!--
+				Навигация. Элементы с authOnly: true рендерятся только
+				для авторизованных пользователей.
+			-->
 			<div class="header__nav">
 				<v-btn
-					v-for="item in menuItems"
+					v-for="item in visibleMenuItems"
 					:key="item.title"
 					:to="item.to"
 					variant="text"
@@ -29,68 +33,88 @@
 
 			<v-spacer />
 
-			<div class="header__search d-none d-sm-flex">
-				<v-text-field
-					v-model="searchQuery"
-					placeholder="Поиск..."
-					variant="solo"
-					density="compact"
-					hide-details
-					single-line
-					class="header__search-field"
-					prepend-inner-icon="mdi-magnify"
-					@keyup.enter="onSearch"
-					@focus="searchFocused = true"
-					@blur="searchFocused = false"
-				>
-				<template #append-inner>
-					<v-fade-transition>
-						<v-icon
-							v-if="searchQuery"
-							size="small"
-							class="header__search-clear"
-							@click="searchQuery = ''"
-						>
-							mdi-close-circle
-						</v-icon>
-					</v-fade-transition>
-				</template>
-				</v-text-field>
-			</div>
-
+			<!--
+				Поиск.
+				Заменили v-text-field на иконочную кнопку:
+				по клику — переход на /search.
+				TODO: при необходимости реализовать модальный поиск
+				      поверх страницы — обсудить позже.
+			-->
 			<div class="header__actions d-flex align-center ml-4">
 				<v-btn
 					icon
 					variant="text"
 					size="small"
-					class="header__action-btn"
-					@click="toggleTheme"
+					class="header__action-btn header__search-btn"
+					aria-label="Поиск"
+					@click="goToSearch"
 				>
-				<v-icon>
-					{{ isDark ? 'mdi-theme-light-dark' : 'mdi-theme-light-dark' }}
-				</v-icon>
-				</v-btn>
-
-				<v-btn
-					icon
-					variant="text"
-					size="small"
-					class="header__action-btn d-none d-sm-flex"
-				>
-				<v-badge dot color="error">
-					<v-icon>mdi-bell-outline</v-icon>
-				</v-badge>
+					<v-icon>mdi-magnify</v-icon>
 				</v-btn>
 			</div>
 
-			<v-btn
-				color="white"
-				class="header__auth-btn ml-4"
-				elevation="0"
-				@click="goToAuth"
-			>
-				Вход/Регистрация
-			</v-btn>
+			<!--
+				Авторизованный пользователь: аватар + выпадающее меню (профиль/выход).
+				Гость: две кнопки «Войти» и «Регистрация».
+			-->
+			<template v-if="currentUser">
+				<v-menu offset="10">
+					<template #activator="{ props }">
+						<v-btn
+							v-bind="props"
+							variant="text"
+							class="header__user-btn ml-4"
+						>
+							<v-avatar size="32" color="primary" class="mr-2">
+								<span class="header__user-initials">
+									{{ userInitials }}
+								</span>
+							</v-avatar>
+							<span class="header__user-name d-none d-sm-inline">
+								{{ currentUser.name }}
+							</span>
+							<v-icon end>mdi-chevron-down</v-icon>
+						</v-btn>
+					</template>
+
+					<v-list density="compact" class="header__user-menu">
+						<v-list-item to="/profile" prepend-icon="mdi-account-circle-outline">
+							<v-list-item-title>Профиль</v-list-item-title>
+						</v-list-item>
+						<v-list-item
+							to="/recommendations"
+							prepend-icon="mdi-star-outline"
+						>
+							<v-list-item-title>Рекомендации</v-list-item-title>
+						</v-list-item>
+						<v-divider />
+						<v-list-item
+							prepend-icon="mdi-logout"
+							@click="onLogout"
+						>
+							<v-list-item-title>Выйти</v-list-item-title>
+						</v-list-item>
+					</v-list>
+				</v-menu>
+			</template>
+
+			<template v-else>
+				<v-btn
+					variant="text"
+					class="header__guest-btn ml-2 d-none d-sm-flex"
+					to="/login"
+				>
+					Войти
+				</v-btn>
+				<v-btn
+					color="white"
+					class="header__auth-btn ml-2"
+					elevation="0"
+					to="/register"
+				>
+					Регистрация
+				</v-btn>
+			</template>
 
 			<v-btn
 				icon
@@ -111,7 +135,7 @@
 	>
 		<v-list density="compact" class="header__drawer-list pa-4">
 		<v-list-item
-			v-for="item in menuItems"
+			v-for="item in visibleMenuItems"
 			:key="item.title"
 			:to="item.to"
 			link
@@ -126,54 +150,86 @@
 
 		<v-divider class="my-4" />
 
-		<v-text-field
-			v-model="searchQuery"
-			placeholder="Поиск..."
-			variant="outlined"
-			density="compact"
-			hide-details
-			prepend-inner-icon="mdi-magnify"
+		<!--
+			В мобильном drawer тоже заменили поле ввода на кнопку
+			«Поиск», ведущую на /search — единое поведение по приложению.
+		-->
+		<v-btn
+			block
+			variant="tonal"
+			prepend-icon="mdi-magnify"
 			class="header__drawer-search mb-4"
-			@keyup.enter="onSearch"
-		/>
+			@click="goToSearch"
+		>
+			Поиск
+		</v-btn>
 		</v-list>
 	</v-navigation-drawer>
 	</template>
 
 	<script>
 	import { useTheme } from 'vuetify'
+	import { storeToRefs } from 'pinia'
+	import { useUserStore } from '~/stores/user'
+	import { useAuth } from '~/composables/useAuth.js'
 
 	export default {
 	name: 'AppHeader',
 
 	setup() {
+		// Тёмная тема зафиксирована: переключатель удалён, но Vuetify
+		// по умолчанию открывает light — выставляем dark здесь.
 		const theme = useTheme()
 		theme.global.name.value = 'dark';
-		return { theme }
+
+		// Реактивный isAuthenticated/user из Pinia — после login/logout
+		// хэдер сам перерисует кнопки и пункты меню.
+		const userStore = useUserStore()
+		const { user, isAuthenticated } = storeToRefs(userStore)
+		const auth = useAuth()
+		return { theme, user, isAuthenticated, auth }
 	},
 
 	data() {
 		return {
-		searchQuery: '',
-		searchFocused: false,
 		drawer: false,
 		isScrolled: false,
+		// Пункт «Топ 100» удалён.
+		// authOnly: true — рендерим только для авторизованных пользователей.
 		menuItems: [
 			{ title: 'Каталог', to: '/catalog' },
-			{ title: 'Рекомендации для вас', to: '/recommendations' },
-			{ title: 'Топ 100', to: '/top' }
+			{ title: 'Рекомендации', to: '/recommendations', authOnly: true }
 		]
 		}
 	},
 
 	computed: {
-		isDark() {
-			return this.theme.global.current.value.dark
+		// Текущий пользователь: предпочитаем стор (реактивно),
+		// fallback на localStorage — чтобы при первой загрузке по прямой
+		// ссылке кнопки сразу выглядели правильно.
+		currentUser() {
+			if (this.user) return this.user
+			return this.auth.getCurrentUser?.() || null
+		},
+
+		userInitials() {
+			const name = this.currentUser?.name || ''
+			const parts = name.trim().split(/\s+/)
+			return ((parts[0]?.[0] || '?') + (parts[1]?.[0] || '')).toUpperCase()
+		},
+
+		// Скрываем authOnly-пункты от анонимов.
+		visibleMenuItems() {
+			return this.menuItems.filter(
+				(item) => !item.authOnly || !!this.currentUser
+			)
 		}
 	},
 
 	mounted() {
 		window.addEventListener('scroll', this.handleScroll)
+		// Подтягиваем сессию из localStorage в стор при первом рендере.
+		this.auth.restore?.()
 	},
 
 	beforeUnmount() {
@@ -185,20 +241,15 @@
 			this.isScrolled = window.scrollY > 20
 		},
 
-		toggleTheme() {
-			const current = this.theme.global.name.value;
-			const next = current === 'dark' ? 'light' : 'dark';
-			this.theme.global.name.value = next;
+		// Переход на отдельную страницу поиска вместо инлайн-формы.
+		// drawer закрываем явно, чтобы при мобильном тапе он не оставался открытым.
+		goToSearch() {
+			this.drawer = false
+			this.$router.push('/search')
 		},
 
-		onSearch() {
-			if (this.searchQuery.trim()) {
-				this.$router.push(`/search?q=${encodeURIComponent(this.searchQuery)}`)
-				this.drawer = false
-			}
-		},
-
-		goToAuth() {
+		onLogout() {
+			this.auth.logout()
 			this.$router.push('/login')
 		}
 	}
@@ -300,49 +351,6 @@
 	}
 }
 
-.header__search {
-	max-width: 400px;
-	width: 100%;
-}
-
-.header__search-field {
-	:deep(.v-field) {
-		background: rgba(255, 255, 255, 0.06);
-		border-radius: 24px;
-		font-size: 14px;
-		transition: all 0.3s ease;
-
-		// &:hover {
-		// background: rgba(255, 255, 255, 0.1);
-		// }
-
-		&.v-field--focused {
-		background: rgba(255, 255, 255, 0.12);
-		box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
-		}
-	}
-
-	:deep(.v-field__input) {
-		padding: 8px 16px;
-		min-height: 40px;
-		color: rgba(255, 255, 255, 0.9);
-	}
-
-	:deep(.v-field__prepend-inner) {
-		padding-top: 8px;
-		color: rgba(255, 255, 255, 0.5);
-	}
-
-	:deep(input::placeholder) {
-		color: rgba(255, 255, 255, 0.4);
-		opacity: 1;
-	}
-}
-
-.header__search-clear {
-	cursor: pointer;
-}
-
 .header__actions {
 	gap: 4px;
 }
@@ -355,6 +363,28 @@
 	// 	color: #ff6b35 !important;
 	// 	transform: scale(1.1);
 	// }
+}
+
+.header__user-btn {
+	text-transform: none;
+	font-weight: 600;
+	color: #fff !important;
+	border-radius: 999px;
+}
+
+.header__user-initials {
+	font-size: 12px;
+	font-weight: 700;
+	color: #fff;
+}
+
+.header__user-name {
+	font-size: 14px;
+}
+
+.header__guest-btn {
+	text-transform: none;
+	color: #fff !important;
 }
 
 .header__auth-btn {
@@ -385,10 +415,6 @@
 }
 
 @media (max-width: 600px) {
-.header__search {
-	max-width: 180px;
-}
-
 .header__auth-btn {
 	font-size: 12px !important;
 	padding: 0 16px !important;

@@ -1,165 +1,118 @@
 <template>
 	<div class="home">
-		<section class="home__section home__section--slider">
-			<div class="home__slider-wrapper">
-				<Swiper
-					:modules="modules"
-					:slides-per-view="'auto'"
-					:space-between="24"
-					:loop="true"
-					:autoplay="{
-						delay: 3000,
-						disableOnInteraction: false,
-						pauseOnMouseEnter: true
-					}"
-					:mousewheel="{ forceToAxis: true }"
-					:grab-cursor="true"
-					class="home__swiper"
-				>
-					<SwiperSlide
-						v-for="book in popularBooks"
-						:key="book.id"
-						class="home__slide"
-					>
-						<BookCard :book="book" />
-					</SwiperSlide>
-				</Swiper>
-			</div>
-		</section>
-		<v-container class="home__container">
-			<section class="home__section">
-				<div class="home__section-header">
-					<h2 class="home__title">Новинки</h2>
-					<v-btn
-						variant="text"
-						color="white"
-						to="/catalog?sort=new"
-						class="home__more-btn"
-					>
-						Все
-						<v-icon end>mdi-chevron-right</v-icon>
-					</v-btn>
-				</div>
-				<div class="home__slider-wrapper">
-					<Swiper
-						class="home__swiper"
-						:modules="modules"
-						:slides-per-view="'auto'"
-						:space-between="24"
-						:mousewheel="{ forceToAxis: true }"
-						:grab-cursor="true"
-					>
-						<SwiperSlide
-							v-for="book in popularBooks"
-							:key="book.id"
-							class="home__slide"
-						>
-							<BookCard :book="book" />
-						</SwiperSlide>
-					</Swiper>
-				</div>
-			</section>
+		<!--
+			Hero «Рекомендация дня» — самый верх главной, сразу под хэдером.
+			Данные подгружаются из моков (см. ~/mocks/homeMocks.js).
+		-->
+		<HeroDaily :book="heroBook" />
 
-			<section class="home__section">
-				<div class="home__section-header">
-					<h2 class="home__title">Сейчас читают</h2>
-				</div>
-				<div class="home__slider-wrapper">
-					<Swiper
-						class="home__swiper"
-						:modules="modules"
-						:slides-per-view="'auto'"
-						:space-between="24"
-						:mousewheel="{ forceToAxis: true }"
-						:grab-cursor="true"
-					>
-						<SwiperSlide
-							v-for="book in readingNowBooks"
-							:key="book.id"
-							class="home__slide"
-						>
-							<BookCard :book="book" />
-						</SwiperSlide>
-					</Swiper>
-				</div>
-			</section>
-			<section class="home__section">
-				<div class="home__section-header">
-					<h2 class="home__title">Подборки жанров для вас</h2>
-				</div>
-				<!-- <div class="home__slider-wrapper">
-					<Swiper
-						class="home__swiper"
-						:modules="modules"
-						:slides-per-view="'auto'"
-						:space-between="24"
-						:mousewheel="{ forceToAxis: true }"
-						:grab-cursor="true"
-					>
-						<SwiperSlide
-							v-for="book in readingNowBooks"
-							:key="book.id"
-							class="home__slide"
-						>
-							<BookCard :book="book" />
-						</SwiperSlide>
-					</Swiper>
-				</div> -->
-				<div class="text-later">Тут будут подборки по жанрам...</div>
-			</section>
+		<v-container class="home__container">
+			<!--
+				Публичные карусели — отображаются всем пользователям,
+				в том числе неавторизованным.
+			-->
+			<BookCarousel
+				title="Популярное"
+				:books="popularBooks"
+				view-all-to="/catalog?filter=popular"
+			/>
+
+			<BookCarousel
+				title="Новинки"
+				:books="newBooks"
+				view-all-to="/catalog?filter=new"
+			/>
+
+			<BookCarousel
+				title="Рейтинг"
+				:books="topRatedBooks"
+				view-all-to="/catalog?filter=top-rated"
+			/>
+
+			<BookCarousel
+				title="Выбор редакции"
+				:books="editorsChoice"
+				view-all-to="/catalog?filter=editors-choice"
+			/>
+
+			<!--
+				Персональные карусели — только для авторизованных пользователей.
+				Признак авторизации берётся из Pinia-стора useUserStore.
+				Используем v-if (а не v-show), чтобы DOM не содержал лишних
+				секций, когда пользователь не залогинен.
+			-->
+			<template v-if="isAuthenticated">
+				<BookCarousel
+					title="Рекомендуем вам"
+					:books="forYouBooks"
+					view-all-to="/catalog?filter=for-you"
+				/>
+
+				<BookCarousel
+					title="По вашим жанрам"
+					:books="byGenresBooks"
+					view-all-to="/catalog?filter=by-genres"
+				/>
+
+				<BookCarousel
+					title="Похожие на просмотренные"
+					:books="similarViewedBooks"
+					view-all-to="/catalog?filter=similar-viewed"
+				/>
+			</template>
 		</v-container>
 	</div>
 </template>
 
 <script>
-import { Swiper, SwiperSlide } from 'swiper/vue';
-import { Autoplay, Mousewheel, Navigation } from 'swiper/modules';
+import { storeToRefs } from 'pinia';
+import { useUserStore } from '~/stores/user';
 
-import 'swiper/css';
-import 'swiper/css/autoplay';
-import 'swiper/css/navigation';
+import HeroDaily from '~/components/common/HeroDaily.vue';
+import BookCarousel from '~/components/common/BookCarousel.vue';
 
-import BookCard from '~/components/common/BookCard';
+// === MOCK DATA — заменить на реальные эндпоинты когда бэкенд будет готов ===
+import {
+	heroBook,
+	popularBooks,
+	newBooks,
+	topRatedBooks,
+	editorsChoice,
+	forYouBooks,
+	byGenresBooks,
+	similarViewedBooks
+} from '~/mocks/homeMocks.js';
 
 export default {
 	name: 'HomePage',
 
 	components: {
-		BookCard,
-		Swiper,
-		SwiperSlide
+		HeroDaily,
+		BookCarousel
 	},
 
-	async setup() {
-		const { searchBooks, getNewestBooks } = useBooks()
-
-		const { data: loadedData, pending } = await useAsyncData('home-data', async () => {
-			const [popular, news, reading] = await Promise.all([
-				searchBooks('subject:Fiction', 15),
-				getNewestBooks(),
-				searchBooks('subject:science', 15)
-			])
-			return { popular, news, reading }
-		})
+	setup() {
+		// Признак авторизации — наружу отдаём как реактивный ref.
+		// Это позволяет в шаблоне писать просто isAuthenticated.
+		const userStore = useUserStore();
+		const { isAuthenticated } = storeToRefs(userStore);
 
 		return {
-			loadedData,
-			pending,
-			modules: [Autoplay, Mousewheel, Navigation]
-		}
-	},
-
-	computed: {
-		popularBooks() {
-			return this.loadedData?.popular || []
-		},
-		newBooks() {
-			return this.loadedData?.news || []
-		},
-		readingNowBooks() {
-			return this.loadedData?.reading || []
-		}
+			isAuthenticated,
+			// все секции — из mock-файла
+			heroBook,
+			popularBooks,
+			newBooks,
+			topRatedBooks,
+			editorsChoice,
+			forYouBooks,
+			byGenresBooks,
+			similarViewedBooks
+		};
 	}
+
+	// TODO: когда бэкенд будет готов, заменить mock-импорты на параллельные
+	// fetch-запросы по эндпоинтам, перечисленным в ~/mocks/homeMocks.js.
 }
 </script>
 
@@ -167,80 +120,19 @@ export default {
 .home {
 	padding-top: 10px;
 	padding-bottom: 60px;
-	
+
 	&__container {
 		max-width: 1440px;
 		margin: 0 auto;
 		padding: 0 100px;
 	}
 
-	&__section {
-		margin-bottom: 48px;
-	}
-	
-	&__section-header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: 24px;
+	@media (max-width: 960px) {
+		&__container { padding: 0 24px; }
 	}
 
-	&__title {
-		font-size: 24px;
-		font-weight: 700;
-		letter-spacing: 0.5px;
-	}
-
-	&__more-btn {
-		text-transform: none;
-		font-weight: 600;
-	}
-
-	&__slider-wrapper {
-		width: 100%;
-		overflow: hidden;
-	}
-
-	&__swiper {
-		width: 100%;
-		padding-right: 16px;
-		padding-bottom: 20px;
-	}
-
-	&__slide {
-		// width: 100px !important;
-
-		@media (min-width: 960px) {
-			width: 180px !important;
-		}
-	}
-
-	.swiper-wrapper {
-		width: 100%;
-	}
-
-	&__grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-		gap: 24px;
-		
-		.v-skeleton-loader {
-			width: 100%;
-			border-radius: 12px;
-			background: rgba(255,255,255,0.05);
-		}
-
-		@media (max-width: 600px) {
-			grid-template-columns: repeat(2, 1fr);
-			gap: 16px;
-		}
-	}
-
-	.text-later {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding-block: 20px;
+	@media (max-width: 600px) {
+		&__container { padding: 0 16px; }
 	}
 }
 </style>
