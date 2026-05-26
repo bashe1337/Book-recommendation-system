@@ -1,0 +1,16 @@
+D:\books\Book-recommendation-system\backend\Brs.Application\bin\Debug\net8.0\Brs.Application.deps.json
+D:\books\Book-recommendation-system\backend\Brs.Application\bin\Debug\net8.0\Brs.Application.dll
+D:\books\Book-recommendation-system\backend\Brs.Application\bin\Debug\net8.0\Brs.Application.pdb
+D:\books\Book-recommendation-system\backend\Brs.Application\bin\Debug\net8.0\Brs.Domain.dll
+D:\books\Book-recommendation-system\backend\Brs.Application\bin\Debug\net8.0\Brs.Domain.pdb
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.csproj.AssemblyReference.cache
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.AssemblyInfoInputs.cache
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.AssemblyInfo.cs
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.csproj.CoreCompileInputs.cache
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Appl.5A4239DC.Up2Date
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.dll
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\refint\Brs.Application.dll
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.pdb
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\ref\Brs.Application.dll
+D:\books\Book-recommendation-system\backend\Brs.Application\obj\Debug\net8.0\Brs.Application.sourcelink.json

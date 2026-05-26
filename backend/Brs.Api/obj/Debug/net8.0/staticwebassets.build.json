@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "CAWCGZsq4CTj3d4ZDXr2mWg086+KzAR/4mt/BAQkkJA=",
+  "Source": "Brs.Api",
+  "BasePath": "_content/Brs.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

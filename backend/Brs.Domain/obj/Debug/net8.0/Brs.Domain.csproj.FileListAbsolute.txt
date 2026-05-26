@@ -1,0 +1,13 @@
+D:\books\Book-recommendation-system\backend\Brs.Domain\bin\Debug\net8.0\Brs.Domain.deps.json
+D:\books\Book-recommendation-system\backend\Brs.Domain\bin\Debug\net8.0\Brs.Domain.dll
+D:\books\Book-recommendation-system\backend\Brs.Domain\bin\Debug\net8.0\Brs.Domain.pdb
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.AssemblyInfoInputs.cache
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.AssemblyInfo.cs
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.csproj.CoreCompileInputs.cache
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.dll
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\refint\Brs.Domain.dll
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.pdb
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\ref\Brs.Domain.dll
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.csproj.AssemblyReference.cache
+D:\books\Book-recommendation-system\backend\Brs.Domain\obj\Debug\net8.0\Brs.Domain.sourcelink.json
